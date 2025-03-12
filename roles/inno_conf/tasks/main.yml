@@ -1,0 +1,50 @@
+---
+# tasks file for inno_conf
+
+## Utilisation des api pour configurer plesk
+
+## Création du domain
+  - name: Creation du domain Plesk
+    ansible.builtin.uri:
+      url: "https://10.6.0.104/api/v2/domains"
+      user: "admin"
+      password: "changeme1Q**"
+      force_basic_auth: true
+      method: POST
+      validate_certs: false
+      body_format: json
+      body: 
+        name: "exemple.com"
+        description: "My website"
+        hosting_type: "virtual"
+        hosting_settings:
+          ftp_login: "test_login"
+          ftp_password: "test!test1"
+        ip_addresses: [10.55.189.23]
+        plan:
+          name: "Unlimited"
+      headers:
+        accept: application/json
+        content-type: application/json
+      status_code: 201
+      
+## Création des utilisateurs FTP
+## Ajout des utilisateurs aux groupe www-data
+
+## Ajout du serveurs de base de donnée
+
+## Creation de la base de donnée
+
+## Copie du site
+  - name: Copie du site
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} tomove=$(ls /var/www/html);for name in $tomove;do mv /var/www/html/$name /var/www/{{ project_name }}; done
+
+## Gestion des droit du site root:www-data 775
+
+## Activation du site
+  - name: Activation Site
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} a2ensite {{ project_name }}.conf
+
+## reload apache 
+  - name: Reload apache
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} service apache2 start

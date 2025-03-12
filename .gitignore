@@ -1,0 +1,4 @@
+## Fichier a ignorer ##
+config.php.j2
+ansistrano_push.yml
+ansistrano_deploy.yml

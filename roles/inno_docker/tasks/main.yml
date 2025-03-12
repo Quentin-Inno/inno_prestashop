@@ -1,0 +1,53 @@
+---
+# tasks file for inno_docker
+# -- Playbook par QBABULEAUD
+
+  # Lancement de l'installation de docker et de ses dépendances
+
+  - name: Installation Aptitude
+    apt:
+      name: aptitude
+      state: latest
+      update_cache: true
+
+  - name: Installation des paquets requis
+    apt:
+      pkg:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+      state: latest
+      update_cache: true
+
+  - name: Ajout des clef GPG Docker
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Ajout du dossier Docker
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu focal stable
+      state: present
+  
+  - name: Installation Docker
+    apt:
+      name: docker-ce
+      state: latest
+      update_cache: true
+
+  - name: Installation des modules Docker et docker compose
+    pip:
+     name: 
+       - docker
+       - docker-compose
+
+  # On ajoute l'utilisateur au groupe docker afin de pouvoir lancer nos dockers
+  - name : Ajouter l'utilisateur au groupe docker
+    user:
+      name: "{{ my_remote_user }}"
+      group: docker
+      append: true
