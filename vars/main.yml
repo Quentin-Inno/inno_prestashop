@@ -1,18 +1,15 @@
 #### == Variables projet == ####
-project_name: meduseshop
-site_name: prestashop.fajitas.innosys.fr
+project_name: olow
+domain: fajitas.innosys.fr
+site_name: "{{ project_name }}.{{ domain }}"
 
-#### == Variable Utilisateur == ####
+#### == Variables Utilisateur == ####
 my_remote_user: deploy
 
-#### == Variable Dossier == ####
+#### == Variables Dossier == ####
 user_home: "/home/{{ my_remote_user }}"
 
-#### == Variable Database == ####
-database_name: inno_database
-database_user: innosys
-database_user_password: innosys
-database_root_password: monptitroot
+
 
 #### == Variables containeurs == ####
 docker_container:
@@ -22,25 +19,26 @@ docker_container:
         name: prestanet
       port: ["33062:3306"]
       restart_policy: always
-      volume: "/var/log/{{ project_name }}/data:/var/log"
+      volume: ["/etc/localtime:/etc/localtime:ro","/var/log/{{ project_name }}/data:/var/log","{{ user_home }}/{{ project_name }}/db:/var/lib/mysql"]
 
     - name : prestashop
       network :
         id: 22
         name: prestanet
-      port: ["8085:80","443:443"]
+      port: ["8089:80","443:443"]
       restart_policy: always
-      volume: ["/var/log/{{ project_name }}/prestashop:/var/log/apache2","{{ user_home }}/{{ project_name }}/{{ site_name }}:/var/www/{{ project_name }}","{{ user_home }}/{{ project_name }}/vhost/{{ project_name }}.conf:/etc/apache2/sites-available/{{ project_name }}.conf"]
-    
-    - name : plesk
-      network :
-        id: 23
-        name: prestanet
-      port: ["8880:8880","8443:8443","8447:8447","9443:443","8086:80"]
-      restart_policy: always
-      volume: ["/var/log/{{ project_name }}/plesk:/var/log/apache2","{{ user_home }}/{{ project_name }}/{{ site_name }}:/var/www/vhosts/{{ site_name }}/httpdocs/"]
+      volume: ["/etc/localtime:/etc/localtime:ro","/var/log/{{ project_name }}/prestashop:/var/log/apache2","{{ user_home }}/{{ project_name }}/{{ site_name }}:/var/www/{{ project_name }}","{{ user_home }}/{{ project_name }}/vhost/{{ project_name }}.conf:/etc/apache2/sites-available/{{ project_name }}.conf"]
 
-#### == Varibale réseau containeurs == ####
+    
+    # - name : plesk
+    #   network :
+    #     id: 23
+    #     name: prestanet
+    #   port: ["8880:8880","8443:8443","8447:8447","9443:443","8086:80"]
+    #   restart_policy: always
+    #   volume: ["/var/log/{{ project_name }}/plesk:/var/log/apache2","{{ user_home }}/{{ project_name }}/{{ site_name }}:/var/www/vhosts/{{ site_name }}/httpdocs/"]
+
+#### == Variable réseau containeurs == ####
 docker_network : 
      name : prestanet
      prefix : 10.55.189

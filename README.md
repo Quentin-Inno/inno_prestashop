@@ -1,4 +1,4 @@
-#### == INNO_PRESTAPLESK == ####
+#### == INNO_PRESTASHOP == ####
 
 Projet de déploiement Prestashop gérable par plesk
 

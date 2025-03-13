@@ -8,12 +8,3 @@
         ErrorLog /var/log/apache2/error.{{ project_name }}.log
         CustomLog /var/log/apache2/access.{{ project_name }}.log combined
 </VirtualHost>
-
-<VirtualHost *:443>
-  ServerName  {{ site_name }}
-  DocumentRoot /var/www/{{ project_name }}
-  <Directory /var/www/{{ project_name }}>
-                AllowOverride all
-                Require all granted
-        </Directory>
-</VirtualHost>

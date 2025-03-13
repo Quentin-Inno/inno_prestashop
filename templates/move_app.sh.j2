@@ -1,0 +1,6 @@
+#!/bin/bash
+
+tomove=$(ls /var/www/html)
+for name in $tomove
+    do mv /var/www/html/$name /var/www/{{ project_name }}
+done

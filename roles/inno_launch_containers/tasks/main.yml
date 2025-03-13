@@ -55,24 +55,23 @@
       volumes: "{{ docker_container[1].volume }}"
       ports: "{{ docker_container[1].port }}"
       env: 
-        DB_SERVER: "{{ docker_network.prefix }}.{{ docker_container[0].network.id }}"
+        DB_SERVER: "inno-{{ docker_container[0].name }}"
         DB_NAME: "{{ database_name }}"
         DB_USER: "{{ database_user }}"
         DB_PASSWD: "{{ database_user_password }}"
+        TRUSTED_PROXIES: "0.0.0.0/0"
+        # PS_INSTALL_AUTO: "{{ project.prestaconf.install_auto }}"
+        # PS_DOMAIN: "{{ site_name }}"
+        # PS_FOLDER_ADMIN: "{{ project.prestaconf.admin.panel }}"
+        # PS_FOLDER_INSTALL: "{{ project.prestaconf.install_name }}"
+        # PS_LANGUAGE: "{{ project.prestaconf.lang.default }}"
+        # PS_ALL_LANGUAGES: "{{ project.prestaconf.lang.install_all }}"
+        # PS_ENABLE_SSL: "{{ project.prestaconf.ssl }}"
+        # ADMIN_MAIL: "{{ project.prestaconf.admin.mail }}"
+        # ADMIN_PASSWD: "{{ project.prestaconf.admin.pass }}"
+
       networks:
         - name: "{{ docker_container[1].network.name }}"
           ipv4_address: "{{ docker_network.prefix }}.{{ docker_container[1].network.id }}"
    
-  - name : Lancement du containeur plesk
-    community.docker.docker_container:
-      name: Inno_{{ project_name }}_{{ docker_container[2].name }}
-      image: image_{{ project_name }}_{{ docker_container[2].name }}
-      restart_policy: "{{ docker_container[2].restart_policy }}"
-      hostname: "inno-{{ docker_container[2].name }}"
-      volumes: "{{ docker_container[2].volume }}"
-      ports: "{{ docker_container[2].port }}"
-      privileged: true
-      networks:
-        - name: "{{ docker_container[2].network.name }}"
-          ipv4_address: "{{ docker_network.prefix }}.{{ docker_container[2].network.id }}"
 

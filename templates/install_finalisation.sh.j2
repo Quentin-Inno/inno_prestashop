@@ -1,0 +1,7 @@
+#!/bin/bash
+
+mv {{ user_home }}/{{ project_name }}/{{ site_name }}/admin {{ user_home }}/{{ project_name }}/{{ site_name }}/{{ project.prestaconf.admin.panel }}
+mv {{ user_home }}/{{ project_name }}/{{ site_name }}/install {{ user_home }}/{{ project_name }}/{{ site_name }}/{{ project.prestaconf.install_name }}
+
+touch {{ user_home }}/{{ project_name }}/{{ site_name }}/.htaccess
+chmod 666 {{ user_home }}/{{ project_name }}/{{ site_name }}/.htaccess

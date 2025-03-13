@@ -2,3 +2,6 @@
 config.php.j2
 ansistrano_push.yml
 ansistrano_deploy.yml
+vars/*.yml
+!vars/main.yml
+!presta_exemple.yml

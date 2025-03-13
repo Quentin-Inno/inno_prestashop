@@ -1,12 +1,13 @@
  ## -- Playbook par QBABULEAUD
   
-- name: Installation initial de prestashop/plesk  ## Lancement de l'installation de docker et de ses dépendances
+- name: Installation initial de prestashop  ## Lancement de l'installation de docker et de ses dépendances
   remote_user: "{{ my_remote_user }}" # Utilisateur qui initiera le cmd distantes
   become: true # Permet d'initié les commandes en temps que sudoers
-  hosts: fajitas # Machine ciblé par les tasks
+  hosts: FAJITAS # Machine ciblé par les tasks
   gather_facts: no
   vars_files : # Variables utilisé dans les tasks qui suivent
     - vars/main.yml
+    - vars/olow.yml
   tasks:
 
 #### == Création de l'environnement du site et déploiement de celui ci == ####
@@ -14,53 +15,64 @@
   #   include_role:
   #       name: inno_docker
 
-#   - name: Creation du dossier du projet
-#     file:
-#       path: "{{ user_home }}/{{ project_name }}/vhost/"  
-#       state: directory
-#       recurse: yes
-#       owner: "{{ my_remote_user }}"
-#       group: www-data
-#       mode: 0755
+  - name: Creation du dossier du projet
+    file:
+      path: "{{ user_home }}/{{ project_name }}/vhost/"  
+      state: directory
+      recurse: yes
+      owner: "{{ my_remote_user }}"
+      group: www-data
+      mode: 0755
 
-#   - name: Generation du Vhost
-#     template:
-#       src: "templates/vhost.conf.j2"
-#       dest: "{{ user_home }}/{{ project_name }}/vhost/{{ project_name }}.conf"
-#       owner: root
-#       group: www-data
-#       mode: 0755
+  - name: Generation du Vhost
+    template:
+      src: "templates/vhost.conf.j2"
+      dest: "{{ user_home }}/{{ project_name }}/vhost/{{ project_name }}.conf"
+      owner: root
+      group: www-data
+      mode: 0755
 
-#   - name: Lancement des containers
-#     include_role:
-#         name: inno_launch_containers
+  - name: Lancement des containers
+    include_role:
+        name: inno_launch_containers
 
-# ## Copie du site
-#   - name: Copie du site
-#     shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} tomove=$(ls /var/www/html);for name in $tomove;do mv /var/www/html/$name /var/www/{{ project_name }}; done
+## Activation du site
+  - name: Activation Site
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} a2ensite {{ project_name }}.conf
 
-# ## Gestion des droit du site root:www-data 775
+## Desactivation du vhost par défaut
+  - name: Désactivation du vhost par defaut
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} a2dissite 000-default.conf
 
-# ## Activation du site
-#   - name: Activation Site
-#     shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} a2ensite {{ project_name }}.conf
+# Preparation du déplacement du dossier html
+  - name: Copie du script
+    template:
+      src: ./templates/move_app.sh.j2
+      dest: "{{ user_home }}/{{ project_name }}/move_app.sh"
+      owner: "{{ my_remote_user }}"
+      group: "{{ my_remote_user }}"
+      mode: '0755'
 
-# ## Desactivation du vhost par défaut
-#   - name: Activation Site
-#     shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} a2dissite 000-default.conf
+  - name: Copie du script
+    template:
+      src: ./templates/install_finalisation.sh.j2
+      dest: "{{ user_home }}/{{ project_name }}/install_finalisation.sh"
+      owner: "{{ my_remote_user }}"
+      group: "{{ my_remote_user }}"
+      mode: '0755'
 
-# ## reload apache 
-#   - name: Reload apache
-#     shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} service apache2 start
+  - name: Copie du script dans le container
+    shell: docker cp "{{ user_home }}/{{ project_name }}/move_app.sh"  Inno_{{ project_name }}_{{ docker_container[1].name }}:/tmp/move_app.sh
 
-  # - name: Preparation de la configuration
-  #   include_role:
-  #       name: inno_conf
+
+  - name: Lancement du script
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} /tmp/move_app.sh
+
+## reload apache 
+  - name: Reload apache
+    shell: docker exec Inno_{{ project_name }}_{{ docker_container[1].name }} service apache2 start
+
  
-  - name: Print the gateway for each host when defined
-    ansible.builtin.debug:
-        msg: "la variable env_deploy = {{ env_deploy }}"
-    when: env_deploy == "developpement"
 
 
 

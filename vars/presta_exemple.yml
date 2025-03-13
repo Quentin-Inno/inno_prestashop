@@ -1,0 +1,19 @@
+project:
+  prestaconf:
+    lang:
+      default: fr
+      install_all: 1
+    admin:
+      mail: admin@admin.fr
+      pass: admin123
+      panel: not_an_admin_panel
+    ssl: 1
+    install_name: not_an_install_folder
+    install_auto: 1
+
+
+#### == Variables Database == ####
+database_name: inno_database
+database_user: innosys
+database_user_password: innosys
+database_root_password: monptitroot
