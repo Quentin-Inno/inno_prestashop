@@ -1,77 +1,15 @@
 ---
 # tasks file for inno_launch_container
+- name: Selection du task file en fonction de la version d'ansible
+  set_fact:
+    docker_tasks_file: >-
+      {% if ansible_version.full is version('2.10', '>=') %}task_after_2.10.yml{% else %}task_before_2.10.yml{% endif %}
 
-#### == Création des dockerfiles == ####
-  - name : Creation des images des containeurs
-    template: 
-       src: "{{ role_path }}/templates/{{ item.name }}_dockerfile.j2"
-       dest: "{{ user_home }}/{{ project_name }}/{{ project_name }}_{{ item.name }}.dockerfile"
-    loop : '{{ docker_container }}'
+- name: Lancement du task file
+  ansible.builtin.include_tasks: 
+    file: "{{ docker_tasks_file }}"
 
-#### == Création des images Docker == ####
-  - name : Build des images des containeurs
-    community.docker.docker_image :
-      name: image_{{ project_name }}_{{ item.name }}
-      source: build
-      build:
-        path : "{{ user_home }}"
-        dockerfile: "{{ user_home }}/{{ project_name }}/{{ project_name }}_{{ item.name }}.dockerfile"
-      state: present
-    loop: '{{ docker_container }}'
 
-#### == Création des réseaux == ####
-  - name: Creation du Reseau des containeurs
-    community.docker.docker_network:
-      name: "{{ docker_network.name }}"
-      ipam_config:
-        - subnet: "{{ docker_network.prefix }}.0/24"
 
-#### == Lancement des containers == ####
-## La configuration de celui ci est dans le fichier de variable principal
-## Le dockerfile doit être au format "docker_container.name"_dockerfile.j2
-
-  - name : Lancement du containeur data
-    community.docker.docker_container:
-      name: Inno_{{ project_name }}_{{ docker_container[0].name }}
-      image: image_{{ project_name }}_{{ docker_container[0].name }}
-      restart_policy: "{{ docker_container[0].restart_policy }}"
-      hostname: "inno-{{ docker_container[0].name }}"
-      volumes: "{{ docker_container[0].volume }}"
-      env: 
-        MYSQL_ROOT_PASSWORD: "{{ database_root_password }}"
-        MYSQL_DATABASE: "{{ database_name }}"
-        MYSQL_USER: "{{ database_user }}"
-        MYSQL_PASSWORD: "{{ database_user_password }}"
-      networks:
-        - name: "{{ docker_container[0].network.name }}"
-          ipv4_address: "{{ docker_network.prefix }}.{{ docker_container[0].network.id }}"
-
-  - name : Lancement du containeur Prestashop
-    community.docker.docker_container:
-      name: Inno_{{ project_name }}_{{ docker_container[1].name }}
-      image: image_{{ project_name }}_{{ docker_container[1].name }}
-      restart_policy: "{{ docker_container[1].restart_policy }}"
-      hostname: "inno-{{ docker_container[1].name }}"
-      volumes: "{{ docker_container[1].volume }}"
-      ports: "{{ docker_container[1].port }}"
-      env: 
-        DB_SERVER: "inno-{{ docker_container[0].name }}"
-        DB_NAME: "{{ database_name }}"
-        DB_USER: "{{ database_user }}"
-        DB_PASSWD: "{{ database_user_password }}"
-        TRUSTED_PROXIES: "0.0.0.0/0"
-        # PS_INSTALL_AUTO: "{{ project.prestaconf.install_auto }}"
-        # PS_DOMAIN: "{{ site_name }}"
-        # PS_FOLDER_ADMIN: "{{ project.prestaconf.admin.panel }}"
-        # PS_FOLDER_INSTALL: "{{ project.prestaconf.install_name }}"
-        # PS_LANGUAGE: "{{ project.prestaconf.lang.default }}"
-        # PS_ALL_LANGUAGES: "{{ project.prestaconf.lang.install_all }}"
-        # PS_ENABLE_SSL: "{{ project.prestaconf.ssl }}"
-        # ADMIN_MAIL: "{{ project.prestaconf.admin.mail }}"
-        # ADMIN_PASSWD: "{{ project.prestaconf.admin.pass }}"
-
-      networks:
-        - name: "{{ docker_container[1].network.name }}"
-          ipv4_address: "{{ docker_network.prefix }}.{{ docker_container[1].network.id }}"
    
 

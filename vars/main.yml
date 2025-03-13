@@ -9,7 +9,7 @@ my_remote_user: deploy
 #### == Variables Dossier == ####
 user_home: "/home/{{ my_remote_user }}"
 
-
+prestaconf_vars_file: vars/presta.exemple.yml
 
 #### == Variables containeurs == ####
 docker_container:

@@ -4,16 +4,21 @@
   remote_user: "{{ my_remote_user }}" # Utilisateur qui initiera le cmd distantes
   become: true # Permet d'initié les commandes en temps que sudoers
   hosts: FAJITAS # Machine ciblé par les tasks
-  gather_facts: no
+  gather_facts: yes
   vars_files : # Variables utilisé dans les tasks qui suivent
     - vars/main.yml
     - vars/olow.yml
   tasks:
 
-#### == Création de l'environnement du site et déploiement de celui ci == ####
-  # - name: Installation de docker et de ses prérequis
-  #   include_role:
-  #       name: inno_docker
+## Adaptation AWX
+  - name: Charger le fichier de variables
+    ansible.builtin.include_vars:
+      file: "{{ prestaconf_vars_file }}"
+
+### == Création de l'environnement du site et déploiement de celui ci == ####
+  - name: Installation de docker et de ses prérequis
+    include_role:
+        name: inno_docker
 
   - name: Creation du dossier du projet
     file:
